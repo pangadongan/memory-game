@@ -1,252 +1,141 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kartu Ingatan - Elvin Pangadongan</title>
-    <style>
-        :root{
-            --bg: #0a3c2f;
-            --panel: #0d614b;
-            --accent: #267c65;
-            --card-bg: #fff;
-            --gap: 12px;
-        }
-
+    <style type="text/css">
         *{
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Inter, Arial, Helvetica, sans-serif;
-        }
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
 
-        body{
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg);
-            padding: 20px;
-        }
+body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #0a3c2f;
+}
 
-        .container{
-            width: min(980px, 96vw);
-            background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.06)), var(--panel);
-            padding: clamp(18px, 4vw, 36px);
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: clamp(16px, 3vw, 30px);
-            align-items: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-        }
+.container{
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 30px;
+    background: #0d614b;
+    padding: 40px 60px;
+}
 
-        h2{
-            color: #fff;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            font-size: clamp(1.2rem, 2.2vw, 1.8rem);
-        }
+h2{
+    font-size: 2em;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
 
-        .controls{
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-        }
+.reset{
+    padding: 15px 20px;
+    color: #267c65;
+    background: #fff;
+    border: none;
+    font-size: 1em;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-weight: 600;
+}
 
-        .reset{
-            padding: 10px 16px;
-            color: var(--accent);
-            background: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            cursor: pointer;
-            font-weight: 600;
-            transition: 180ms;
-        }
+.reset:focus{
+    color: #fff;
+    background: #267c65;
+}
 
-        .reset:focus,
-        .reset:hover{
-            color: #fff;
-            background: var(--accent);
-            outline: none;
-        }
+.game{
+    width: 440px;
+    height: 440px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    transform-style: preserve-3d;
+    perspective: 500px;
+}
 
-        /* Responsive grid game board */
-        .game{
-            width: min(680px, 92vw);
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
-            gap: var(--gap);
-            justify-items: center;
-            align-items: center;
-            padding: 6px;
-            perspective: 800px;
-        }
+.item{
+    position: relative;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3em;
+    background: #fff;
+    transition: 0.25s;
+    transform: rotateY(180deg);
+}
 
-        /* card */
-        .item{
-            width: 100%;
-            aspect-ratio: 1 / 1; /* keep square cards */
-            display: grid;
-            place-items: center;
-            font-size: clamp(22px, 4.4vw, 44px);
-            background: var(--card-bg);
-            border-radius: 8px;
-            position: relative;
-            cursor: pointer;
-            transition: transform 260ms ease, box-shadow 200ms ease;
-            transform-style: preserve-3d;
-            transform: rotateY(180deg);
-            user-select: none;
-            box-shadow: 0 6px 14px rgba(0,0,0,0.18);
-        }
+.item.boxOpen{
+    transform: rotateY(0deg);
+}
 
-        .item.boxOpen{
-            transform: rotateY(0deg);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.28);
-        }
+.item::after{
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: #267c65;
+    /*opacity: 0.85;*/
+    transition: 0.25s;
+    transform: rotateY(0deg);
+    backface-visibility: hidden; 
+}
 
-        /* overlay/back of the card */
-        .item::after{
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: var(--accent);
-            border-radius: 8px;
-            transition: transform 260ms ease;
-            transform: rotateY(0deg);
-            backface-visibility: hidden;
-        }
-
-        .boxOpen:after,
-        .boxMatch:after{
-            transform: rotateY(180deg);
-        }
-
-        .boxMatch{
-            /* a subtle highlight for matched cards */
-            outline: 3px solid rgba(255,255,255,0.06);
-            transform: rotateY(0deg);
-            cursor: default;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.32);
-        }
-
-        /* Prevent clicking matched cards */
-        .boxMatch,
-        .boxMatch *{
-            pointer-events: none;
-        }
-
-        /* small-screen adjustments */
-        @media (max-width: 420px){
-            .container{
-                padding: 14px;
-            }
-            .game{
-                gap: 10px;
-            }
-            .reset{
-                padding: 8px 12px;
-                font-size: 0.85rem;
-            }
-        }
+.boxOpen:after, .boxMatch:after{
+    transform: rotateY(180deg);
+}
     </style>
 </head>
 <body>
-    <div class="container" role="application" aria-label="Permainan Kartu Ingatan">
+    <div class="container">
         <h2>Permainan Kartu Ingatan</h2>
-        <div class="game" aria-live="polite"></div>
-        <div class="controls">
-            <button class="reset" id="resetBtn">Coba Lagi</button>
-        </div>
+        <div class="game"></div>
+        <button class="reset" onclick="window.location.reload();">Coba Lagi</button>
     </div>
-
     <script>
-        // Emoji pairs
         const emojis = ["🐯","🐯","🐭","🐭","🐮","🐮","🐼","🐼","🐱","🐱","🐵","🐵","🐶","🐶","🐸","🐸"];
+        var shuf_emojis = emojis.sort(() => (Math.random() > .5) ? 2 : -1);
+        for ( var i =0; i<emojis.length; i++){
+            let box = document.createElement('div')
+            box.className = 'item';
+            box.innerHTML = shuf_emojis[i]
 
-        // Fisher–Yates shuffle for reliable randomization
-        function shuffle(array){
-            let m = array.length, t, i;
-            while(m){
-                i = Math.floor(Math.random() * m--);
-                t = array[m];
-                array[m] = array[i];
-                array[i] = t;
-            }
-            return array;
-        }
+            box.onclick = function(){
+                this.classList.add('boxOpen')
+                setTimeout(function(){
+                    if(document.querySelectorAll('.boxOpen').length > 1){
+                        if(document.querySelectorAll('.boxOpen')[0].innerHTML == document.querySelectorAll('.boxOpen')[1].innerHTML){
+                            document.querySelectorAll('.boxOpen')[0].classList.add('boxMatch')
+                            document.querySelectorAll('.boxOpen')[1].classList.add('boxMatch')
 
-        // App state
-        const gameEl = document.querySelector('.game');
-        const resetBtn = document.getElementById('resetBtn');
-        let busy = false;
+                            document.querySelectorAll('.boxOpen')[1].classList.remove('boxOpen')
+                            document.querySelectorAll('.boxOpen')[0].classList.remove('boxOpen')
 
-        function createBoard(){
-            gameEl.innerHTML = '';
-            busy = false;
-            const shuffled = shuffle([...emojis]);
-
-            shuffled.forEach((emoji, idx) => {
-                const box = document.createElement('div');
-                box.className = 'item';
-                box.setAttribute('role', 'button');
-                box.setAttribute('aria-label', 'Kartu tertutup');
-                box.dataset.emoji = emoji;
-                box.innerHTML = emoji;
-
-                box.addEventListener('click', () => {
-                    if (busy) return;
-                    if (box.classList.contains('boxMatch') || box.classList.contains('boxOpen')) return;
-
-                    // open the card
-                    box.classList.add('boxOpen');
-                    box.setAttribute('aria-label', 'Kartu terbuka');
-
-                    const open = document.querySelectorAll('.boxOpen');
-
-                    if (open.length === 2){
-                        busy = true;
-                        setTimeout(() => {
-                            const [a, b] = open;
-                            if (a.dataset.emoji === b.dataset.emoji){
-                                a.classList.add('boxMatch');
-                                b.classList.add('boxMatch');
-                                a.classList.remove('boxOpen');
-                                b.classList.remove('boxOpen');
-
-                                // Check win
-                                if (document.querySelectorAll('.boxMatch').length === emojis.length){
-                                    setTimeout(() => {
-                                        alert('Selamat — Anda menang!');
-                                    }, 120);
-                                }
-                            } else {
-                                a.classList.remove('boxOpen');
-                                b.classList.remove('boxOpen');
-                                a.setAttribute('aria-label', 'Kartu tertutup');
-                                b.setAttribute('aria-label', 'Kartu tertutup');
+                            if(document.querySelectorAll('.boxMatch').length == emojis.length){
+                                alert('win')
                             }
-                            busy = false;
-                        }, 600);
+                        } else {
+                            document.querySelectorAll('.boxOpen')[1].classList.remove('boxOpen')
+                            document.querySelectorAll('.boxOpen')[0].classList.remove('boxOpen')
+                        }
                     }
-                });
+                },500)
+            }
 
-                gameEl.appendChild(box);
-            });
+            document.querySelector('.game').appendChild(box);
         }
-
-        resetBtn.addEventListener('click', () => {
-            createBoard();
-        });
-
-        // init
-        createBoard();
     </script>
 </body>
 </html>
