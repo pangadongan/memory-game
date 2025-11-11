@@ -1,3 +1,22 @@
+/* Responsive memory game styles
+   Updated to adapt to smartphone screens using flexible grid, vmin sizing,
+   clamp() for fonts/gaps, and responsive padding.
+*/
+
+:root{
+    --bg-outer: #0a3c2f;
+    --bg-inner: #0d614b;
+    --accent: #267c65;
+    --card-bg: #fff;
+
+    /* tweakable layout variables */
+    --max-board-size: 440px;        /* original max */
+    --board-vmin: 90vmin;          /* board will be min of these two */
+    --gap: clamp(6px, 2vw, 10px);
+    --cols: 4;                     /* number of columns (kept 4 for original layout) */
+}
+
+/* Reset */
 *{
     margin: 0;
     padding: 0;
@@ -10,82 +29,142 @@ body{
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: #0a3c2f;
+    background: var(--bg-outer);
+    padding: clamp(12px, 3vw, 32px);
 }
 
+/* Container */
 .container{
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    gap: 30px;
-    background: #0d614b;
-    padding: 40px 60px;
+    gap: clamp(18px, 4vw, 30px);
+    background: var(--bg-inner);
+    padding: clamp(20px, 5vw, 40px);
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    width: min(var(--board-vmin), var(--max-board-size));
 }
 
+/* Title */
 h2{
-    font-size: 2em;
+    font-size: clamp(1.25rem, 3.2vw, 2em);
     color: #fff;
     text-transform: uppercase;
     letter-spacing: 0.1em;
+    text-align: center;
 }
 
+/* Reset button */
 .reset{
-    padding: 15px 20px;
-    color: #267c65;
-    background: #fff;
+    padding: clamp(8px, 2.2vw, 15px) clamp(12px, 3vw, 20px);
+    color: var(--accent);
+    background: var(--card-bg);
     border: none;
-    font-size: 1em;
-    letter-spacing: 0.1em;
+    font-size: clamp(0.85rem, 2.6vw, 1em);
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     cursor: pointer;
     font-weight: 600;
+    border-radius: 6px;
+    transition: all 0.18s ease;
 }
 
-.reset:focus{
-    color: #fff;
-    background: #267c65;
+.reset:focus,
+.reset:hover{
+    color: var(--card-bg);
+    background: var(--accent);
+    outline: none;
+    transform: translateY(-1px);
 }
 
+/* Game board: make it a responsive square using width=min(...) and aspect-ratio */
 .game{
-    width: 440px;
-    height: 440px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    width: 100%;
+    /* Maintain a square board even when width is limited */
+    aspect-ratio: 1 / 1;
+    display: grid;
+    grid-template-columns: repeat(var(--cols), 1fr);
+    gap: var(--gap);
     transform-style: preserve-3d;
-    perspective: 500px;
+    perspective: 800px;
+    /* ensure it doesn't overflow container */
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
+/* Card / Item */
 .item{
     position: relative;
-    width: 100px;
-    height: 100px;
+    /* Each card keeps a square ratio */
+    width: 100%;
+    aspect-ratio: 1 / 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 3em;
-    background: #fff;
-    transition: 0.25s;
+    font-size: clamp(1.6rem, 4.5vw, 3em);
+    background: var(--card-bg);
+    transition: transform 0.25s;
     transform: rotateY(180deg);
+    border-radius: 8px;
+    overflow: hidden;
 }
 
+/* Opened card */
 .item.boxOpen{
     transform: rotateY(0deg);
 }
 
+/* Card face overlay */
 .item::after{
     content: '';
     position: absolute;
     inset: 0;
-    background: #267c65;
-    /*opacity: 0.85;*/
-    transition: 0.25s;
+    background: var(--accent);
+    transition: transform 0.25s;
     transform: rotateY(0deg);
-    backface-visibility: hidden; 
+    backface-visibility: hidden;
 }
 
+/* When open or matched flip the overlay */
 .boxOpen:after, .boxMatch:after{
     transform: rotateY(180deg);
+}
+
+/* Optional improved touch target for small screens */
+@media (max-width: 420px){
+    .container{
+        padding: clamp(12px, 6vw, 22px);
+        gap: clamp(12px, 4vw, 20px);
+    }
+    .game{
+        gap: clamp(6px, 2.5vw, 8px);
+    }
+    .item{
+        font-size: clamp(1.4rem, 5.5vw, 2.2rem);
+        border-radius: 6px;
+    }
+    .reset{
+        font-size: clamp(0.8rem, 3.4vw, 0.95rem);
+    }
+}
+
+/* If you want fewer columns on very narrow screens, you can adjust --cols.
+   Here's a media-driven fallback to 3 columns below 360px wide. */
+@media (max-width: 360px){
+    :root{
+        --cols: 3;
+    }
+}
+
+/* Landscape phones: use a larger board but keep responsive */
+@media (orientation: landscape) and (max-height: 420px){
+    .container{
+        width: min(85vmin, var(--max-board-size));
+    }
+    .game{
+        gap: clamp(6px, 2vw, 10px);
+    }
 }
